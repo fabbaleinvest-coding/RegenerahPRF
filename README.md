@@ -79,7 +79,7 @@ Richiede **Node.js 18+** (nessun `npm install`).
 
 ```bash
 cd ozopet
-node server.js
+node dev/server.js
 # → http://localhost:3000
 ```
 
@@ -87,13 +87,13 @@ Il form invia in `POST /api/contact`; i lead vengono salvati in `data/contacts.j
 Per consultarli via API imposta un token e chiama l'endpoint protetto:
 
 ```bash
-ADMIN_TOKEN="scegli-un-token" node server.js
+ADMIN_TOKEN="scegli-un-token" node dev/server.js
 curl -H "Authorization: Bearer scegli-un-token" http://localhost:3000/api/contacts
 ```
 
 ## ☁️ Deploy
 
-**A) VPS / server proprio** — esegui `node server.js` dietro un reverse proxy
+**A) VPS / server proprio** — esegui `node dev/server.js` dietro un reverse proxy
 (nginx) con HTTPS. È l'opzione che salva i lead su file.
 
 **B) Vercel / Netlify (statico + serverless)** — pubblica la cartella `public/`
