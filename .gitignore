@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+# local lead storage (privacy)
+data/contacts.json
+# build/placeholder backups
+_placeholders_backup/
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+.vercel
