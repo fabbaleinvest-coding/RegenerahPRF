@@ -110,6 +110,13 @@ h1, h2, h3, h4 { font-family: var(--ff-display); font-weight: 700; line-height: 
 #top { scroll-margin-top: 0; }
 .section--alt { background: var(--mist); }
 .section__head { max-width: 760px; margin-bottom: clamp(40px, 6vw, 72px); }
+.head-row { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(28px, 5vw, 64px); align-items: center; margin-bottom: clamp(40px, 6vw, 72px); }
+.head-row .section__head { margin-bottom: 0; }
+.head-figure { position: relative; aspect-ratio: 4 / 3; }
+@media (max-width: 920px) {
+  .head-row { grid-template-columns: 1fr; }
+  .head-figure { order: -1; width: 100%; max-width: 440px; margin-inline: auto; aspect-ratio: 5 / 4; }
+}
 .section__head .lead { margin-top: 22px; }
 
 /* ---------------------------- buttons ----------------------------- */
@@ -215,7 +222,7 @@ body.nav-open .burger span::after { top: 0; transform: rotate(-45deg); }
 .figure-photo { position: absolute; inset: 6% 4% 2% 4%; width: auto; height: auto; max-width: 92%; max-height: 96%; margin: auto; object-fit: contain; object-position: bottom center; filter: drop-shadow(0 30px 30px rgba(10,69,62,.22)); }
 
 /* molecule glyph (oxygen-ozone signature) */
-.molecule { position: absolute; inset: 0; z-index: 1; overflow: visible; }
+.molecule { position: absolute; inset: 0; z-index: 0; overflow: visible; }
 .molecule .bond { stroke: var(--teal); stroke-width: 2.4; opacity: .25; }
 .molecule .atom-o { fill: var(--teal); }
 .molecule .atom-o.l { fill: var(--sage-deep); }
