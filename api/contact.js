@@ -59,9 +59,10 @@ module.exports = async function handler(req, res) {
   if (lead.consenso !== "Sì") return fail(422, "Consenso al trattamento dati obbligatorio.");
 
   try {
-    if (process.env.CONTACT_WEBHOOK_URL) {
-      // -> Zapier Catch Hook -> Microsoft Excel (Add Row)
-      await fetch(process.env.CONTACT_WEBHOOK_URL, {
+    const WEBHOOK_URL = process.env.CONTACT_WEBHOOK_URL || "https://hooks.zapier.com/hooks/catch/8889325/43x1dlu/";
+    if (WEBHOOK_URL) {
+      // -> Zapier Catch Hook -> Google Sheets "OzoPet SalusMedica" (Create Row)
+      await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(lead),
