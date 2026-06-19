@@ -474,3 +474,7 @@ body.nav-open .burger span::after { top: 0; transform: rotate(-45deg); }
 .footer__zones h5 { color: #cfe0db; font-family: var(--ff-display); font-weight: 600; font-size: .92rem; margin: 0 0 10px; }
 .footer__zoneslist { font-size: .8rem; line-height: 1.95; color: #8aa39c; margin: 0; }
 .footer__zoneskw { font-size: .8rem; line-height: 1.7; color: #74908a; margin: 10px 0 0; }
+
+/* ==================== Consulto Medico AI ==================== */
+.consulto-cta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.consulto-note { margin-top: 16px; font-size: .85rem; color: var(--ink-faint); }
