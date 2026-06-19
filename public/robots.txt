@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://regenerah-prf.vercel.app/sitemap.xml
+Sitemap: https://www.ozopetregenerah.it/sitemap.xml
