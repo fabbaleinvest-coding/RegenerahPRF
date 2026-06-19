@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://regenerah-prf.vercel.app/sitemap.xml
