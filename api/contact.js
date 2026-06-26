@@ -1,19 +1,15 @@
 /**
  * Serverless contact handler (Vercel) — OzoPet Salus Medica · REGENERAH
  * --------------------------------------------------------------------
- * Riceve i dati del form (POST JSON) e:
- *   1. valida i campi obbligatori e il consenso GDPR
- *   2. INOLTRA il lead a un webhook (Zapier "Catch Hook") se è impostata
- *      la variabile d'ambiente CONTACT_WEBHOOK_URL  ← da Zapier salva su Excel
- *   3. (opzionale) invia anche una email via Resend se configurato
- *   4. risponde JSON al browser
+ * Riceve i dati del form (POST JSON) e li INOLTRA al nostro backend/database
+ * (app triage -> Supabase) tramite l'endpoint /api/lead: salvataggio della
+ * richiesta + iscrizione automatica al nurturing. Tutte le automazioni sono
+ * gestite dal nostro database: NIENTE Zapier, niente fogli esterni.
  *
  * Nessuna dipendenza esterna (usa fetch globale, Node 18+).
  * Variabili d'ambiente (Vercel → Settings → Environment Variables):
- *   CONTACT_WEBHOOK_URL   URL del Catch Hook di Zapier (consigliato)
- *   RESEND_API_KEY        (opzionale) per invio email
- *   CONTACT_TO            (opzionale) destinatario email
- *   CONTACT_FROM          (opzionale) mittente email verificato su Resend
+ *   NURTURE_LEAD_URL   (opzionale) URL dell'endpoint /api/lead dell'app triage.
+ *                      Default: https://ozo-pet-medical-triage-agent-i9i4.vercel.app/api/lead
  */
 
 function clean(s, max) {
@@ -59,47 +55,23 @@ module.exports = async function handler(req, res) {
   if (lead.consenso !== "Sì") return fail(422, "Consenso al trattamento dati obbligatorio.");
 
   try {
-    const WEBHOOK_URL = process.env.CONTACT_WEBHOOK_URL || "https://hooks.zapier.com/hooks/catch/8889325/43x1dlu/";
-    if (WEBHOOK_URL) {
-      // -> Zapier Catch Hook -> Google Sheets "OzoPet SalusMedica" (Create Row)
-      await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(lead),
-      });
-    }
-    // -> Iscrizione al NURTURING sull'app triage (best-effort, non blocca la risposta).
-    //    Ogni lead del sito vetrina entra nel flusso di nurturing come quelli del consulto.
-    try {
-      const LEAD_URL = process.env.NURTURE_LEAD_URL || "https://ozo-pet-medical-triage-agent-i9i4.vercel.app/api/lead";
-      await fetch(LEAD_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: lead.nome,
-          email: lead.email,
-          telefono: lead.telefono,
-          patologia: lead.messaggio || lead.interesse || lead.animale || null,
-          source: "sito-vetrina",
-        }),
-      });
-    } catch (e) {
-      console.error("nurture enroll error", e && e.message ? e.message : e);
-    }
-
-    if (process.env.RESEND_API_KEY && process.env.CONTACT_TO) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + process.env.RESEND_API_KEY },
-        body: JSON.stringify({
-          from: process.env.CONTACT_FROM || "OzoPet <onboarding@resend.dev>",
-          to: [process.env.CONTACT_TO],
-          subject: `Nuova richiesta — ${lead.nome} (${lead.animale})`,
-          text: `Nome: ${lead.nome}\nTelefono: ${lead.telefono}\nEmail: ${lead.email}\nAnimale: ${lead.animale}\nInteresse: ${lead.interesse}\n\n${lead.messaggio}\n\nRicevuto: ${lead.data}`,
-        }),
-      });
-    }
-    console.log(`[lead] ${lead.createdAt} ${lead.nome} <${lead.email}> ${lead.animale}/${lead.interesse}`);
+    // Tutte le automazioni passano dal nostro backend/database (niente piu' Zapier).
+    const LEAD_URL = process.env.NURTURE_LEAD_URL || "https://ozo-pet-medical-triage-agent-i9i4.vercel.app/api/lead";
+    const r = await fetch(LEAD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: lead.nome,
+        email: lead.email,
+        telefono: lead.telefono,
+        specie: lead.animale,
+        interesse: lead.interesse,
+        messaggio: lead.messaggio,
+        patologia: lead.messaggio || lead.interesse || lead.animale || null,
+        source: "sito-vetrina",
+      }),
+    });
+    console.log(`[lead->db] ${lead.createdAt} ${lead.nome} <${lead.email}> ${lead.animale}/${lead.interesse} status=${r.status}`);
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify({ ok: true, message: "Richiesta ricevuta." }));
