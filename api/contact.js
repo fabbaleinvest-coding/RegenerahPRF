@@ -68,6 +68,25 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify(lead),
       });
     }
+    // -> Iscrizione al NURTURING sull'app triage (best-effort, non blocca la risposta).
+    //    Ogni lead del sito vetrina entra nel flusso di nurturing come quelli del consulto.
+    try {
+      const LEAD_URL = process.env.NURTURE_LEAD_URL || "https://ozo-pet-medical-triage-agent-i9i4.vercel.app/api/lead";
+      await fetch(LEAD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: lead.nome,
+          email: lead.email,
+          telefono: lead.telefono,
+          patologia: lead.messaggio || lead.interesse || lead.animale || null,
+          source: "sito-vetrina",
+        }),
+      });
+    } catch (e) {
+      console.error("nurture enroll error", e && e.message ? e.message : e);
+    }
+
     if (process.env.RESEND_API_KEY && process.env.CONTACT_TO) {
       await fetch("https://api.resend.com/emails", {
         method: "POST",
